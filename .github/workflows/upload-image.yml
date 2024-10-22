@@ -1,0 +1,89 @@
+name: Update Images from Google Drive
+
+on:
+  push:
+    branches:
+      - main  # 'main'ブランチにプッシュされたときに実行
+  schedule:
+    - cron: '*/5 * * * *'  # 5分ごとに実行
+
+jobs:
+  update-images:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    # Node.jsをセットアップ
+    - name: Setup Node.js
+      uses: actions/setup-node@v2
+      with:
+        node-version: '16'
+
+    # 必要なパッケージをインストール
+    - name: Install dependencies
+      run: |
+        npm install googleapis
+
+    # Google Driveから画像をダウンロード
+    - name: Download images from Google Drive
+      env:
+        GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+        GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        GOOGLE_REFRESH_TOKEN: ${{ secrets.GOOGLE_REFRESH_TOKEN }}
+      run: |
+        node << 'EOF'
+        const {google} = require('googleapis');
+        const fs = require('fs');
+        const path = require('path');
+
+        const oauth2Client = new google.auth.OAuth2(
+          process.env.GOOGLE_CLIENT_ID,
+          process.env.GOOGLE_CLIENT_SECRET,
+        );
+        oauth2Client.setCredentials({
+          refresh_token: process.env.GOOGLE_REFRESH_TOKEN
+        });
+
+        const drive = google.drive({ version: 'v3', auth: oauth2Client });
+
+        // 複数のファイルIDを指定
+        const fileIds = [
+          { id: '157EXW6averB9f5omYVGqa19UHp0Hr8eJ', name: 'OuraiWorld/Poster01.jpg' },
+          { id: '1ZEnw6zHG9_hoVtEXu-6V_RwTU3gL8zX-', name: 'OuraiWorld/Poster02.jpg' },
+          { id: '1gEgzkHV3rwkq9piExV3sN01wCJD-dwi-', name: 'OuraiWorld/Poster03.jpg' },
+          { id: '1gSqdvTKzpZLx47SWwOzNF76XCDrjzdO8', name: 'OuraiWorld/Poster04.jpg' },
+        ];
+
+        async function downloadFile(fileId, fileName) {
+          const dest = fs.createWriteStream(fileName);
+          const response = await drive.files.get({ fileId, alt: 'media' }, { responseType: 'stream' });
+          return new Promise((resolve, reject) => {
+            response.data
+              .on('end', () => {
+                console.log(`Downloaded ${fileName}`);
+                resolve();
+              })
+              .on('error', err => {
+                console.error(`Error downloading file ${fileName}:`, err);
+                reject(err);
+              })
+              .pipe(dest);
+          });
+        }
+
+        (async () => {
+          for (const { id, name } of fileIds) {
+            await downloadFile(id, name);
+          }
+        })();
+        EOF
+
+    # 変更をリポジトリにコミット
+    - name: Commit and push changes
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git add .
+        git commit -m "Update images from Google Drive"
+        git push origin main
