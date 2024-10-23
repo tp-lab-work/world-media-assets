@@ -12,13 +12,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout repository
-      uses: actions/checkout@latest
+      uses: actions/checkout@v3
       with:
         token: ${{ secrets.PAT_TOKEN }}
 
     # Node.jsをセットアップ
     - name: Setup Node.js
-      uses: actions/setup-node@latest
+      uses: actions/setup-node@v3
       with:
         node-version: '20'
 
@@ -85,7 +85,10 @@ jobs:
       run: |
         git config --global user.email "action@github.com"
         git config --global user.name "GitHub Action"
-        git add .
+
+        git add --all
+        git reset -- package.json package-lock.json node_modules/
+
         if ! git diff-index --quiet HEAD --; then
           git commit -m "Update images from Google Drive"
           git push
