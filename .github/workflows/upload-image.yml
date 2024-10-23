@@ -1,9 +1,6 @@
 name: Update Images from Google Drive
 
 on:
-  push:
-    branches:
-      - main  # 'main'ブランチにプッシュされたときに実行
   schedule:
     - cron: '*/5 * * * *'  # 5分ごとに実行
 
