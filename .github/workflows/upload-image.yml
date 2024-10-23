@@ -51,10 +51,10 @@ jobs:
 
         // 複数のファイルIDを指定
         const fileIds = [
-          { id: '157EXW6averB9f5omYVGqa19UHp0Hr8eJ', name: 'OuraiWorld/Poster01.jpg' },
-          { id: '1ZEnw6zHG9_hoVtEXu-6V_RwTU3gL8zX-', name: 'OuraiWorld/Poster02.jpg' },
-          { id: '1gEgzkHV3rwkq9piExV3sN01wCJD-dwi-', name: 'OuraiWorld/Poster03.jpg' },
-          { id: '1gSqdvTKzpZLx47SWwOzNF76XCDrjzdO8', name: 'OuraiWorld/Poster04.jpg' },
+          { id: '157EXW6averB9f5omYVGqa19UHp0Hr8eJ', name: 'OuraiWorld/Poster01.png' },
+          { id: '1ZEnw6zHG9_hoVtEXu-6V_RwTU3gL8zX-', name: 'OuraiWorld/Poster02.png' },
+          { id: '1gEgzkHV3rwkq9piExV3sN01wCJD-dwi-', name: 'OuraiWorld/Poster03.png' },
+          { id: '1gSqdvTKzpZLx47SWwOzNF76XCDrjzdO8', name: 'OuraiWorld/Poster04.png' },
         ];
 
         async function downloadFile(fileId, fileName) {
