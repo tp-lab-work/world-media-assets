@@ -2,7 +2,7 @@ name: Update Images from Google Drive
 
 on:
   repository_dispatch:
-    types: [on-demand-test]
+    types: [on-demand-upload]
 
 jobs:
   update-images:
