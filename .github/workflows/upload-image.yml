@@ -8,87 +8,95 @@ jobs:
   update-images:
     runs-on: ubuntu-latest
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v3
-      with:
-        token: ${{ secrets.PAT_TOKEN }}
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.PAT_TOKEN }}
 
-    # Node.jsをセットアップ
-    - name: Setup Node.js
-      uses: actions/setup-node@v3
-      with:
-        node-version: '20'
+      - name: Download files from Google Drive
+        uses: tp-jp/gdrive-file-downloader@main
+        with:
+          google_client_id: ${{ secrets.GOOGLE_CLIENT_ID }}
+          google_client_secret: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+          google_refresh_token: ${{ secrets.GOOGLE_REFRESH_TOKEN }}
+          file_ids: '[{ id: "157EXW6averB9f5omYVGqa19UHp0Hr8eJ", name: "OuraiWorld/Poster01.png" }, { id: "1ZEnw6zHG9_hoVtEXu-6V_RwTU3gL8zX-", name: "OuraiWorld/Poster02.png" }, { id: "1gEgzkHV3rwkq9piExV3sN01wCJD-dwi-", name: "OuraiWorld/Poster03.png" }, { id: "1gSqdvTKzpZLx47SWwOzNF76XCDrjzdO8", name: "OuraiWorld/Poster04.png" }]'
 
-    # 必要なパッケージをインストール
-    - name: Install dependencies
-      run: |
-        npm install googleapis
+      # # Node.jsをセットアップ
+      # - name: Setup Node.js
+      #   uses: actions/setup-node@v3
+      #   with:
+      #     node-version: '20'
 
-    # Google Driveから画像をダウンロード
-    - name: Download images from Google Drive
-      env:
-        GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
-        GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
-        GOOGLE_REFRESH_TOKEN: ${{ secrets.GOOGLE_REFRESH_TOKEN }}
-      run: |
-        node << 'EOF'
-        const {google} = require('googleapis');
-        const fs = require('fs');
-        const path = require('path');
+      # # 必要なパッケージをインストール
+      # - name: Install dependencies
+      #   run: |
+      #     npm install googleapis
 
-        const oauth2Client = new google.auth.OAuth2(
-          process.env.GOOGLE_CLIENT_ID,
-          process.env.GOOGLE_CLIENT_SECRET,
-        );
-        oauth2Client.setCredentials({
-          refresh_token: process.env.GOOGLE_REFRESH_TOKEN
-        });
+      # # Google Driveから画像をダウンロード
+      # - name: Download images from Google Drive
+      #   env:
+      #     GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+      #     GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+      #     GOOGLE_REFRESH_TOKEN: ${{ secrets.GOOGLE_REFRESH_TOKEN }}
+      #   run: |
+      #     node << 'EOF'
+      #     const {google} = require('googleapis');
+      #     const fs = require('fs');
+      #     const path = require('path');
 
-        const drive = google.drive({ version: 'v3', auth: oauth2Client });
+      #     const oauth2Client = new google.auth.OAuth2(
+      #       process.env.GOOGLE_CLIENT_ID,
+      #       process.env.GOOGLE_CLIENT_SECRET,
+      #     );
+      #     oauth2Client.setCredentials({
+      #       refresh_token: process.env.GOOGLE_REFRESH_TOKEN
+      #     });
 
-        // 複数のファイルIDを指定
-        const fileIds = [
-          { id: '157EXW6averB9f5omYVGqa19UHp0Hr8eJ', name: 'OuraiWorld/Poster01.png' },
-          { id: '1ZEnw6zHG9_hoVtEXu-6V_RwTU3gL8zX-', name: 'OuraiWorld/Poster02.png' },
-          { id: '1gEgzkHV3rwkq9piExV3sN01wCJD-dwi-', name: 'OuraiWorld/Poster03.png' },
-          { id: '1gSqdvTKzpZLx47SWwOzNF76XCDrjzdO8', name: 'OuraiWorld/Poster04.png' },
-        ];
+      #     const drive = google.drive({ version: 'v3', auth: oauth2Client });
 
-        async function downloadFile(fileId, fileName) {
-          const dest = fs.createWriteStream(fileName);
-          const response = await drive.files.get({ fileId, alt: 'media' }, { responseType: 'stream' });
-          return new Promise((resolve, reject) => {
-            response.data
-              .on('end', () => {
-                console.log(`Downloaded ${fileName}`);
-                resolve();
-              })
-              .on('error', err => {
-                console.error(`Error downloading file ${fileName}:`, err);
-                reject(err);
-              })
-              .pipe(dest);
-          });
-        }
+      #     // 複数のファイルIDを指定
+      #     const fileIds = [
+      #       { id: '157EXW6averB9f5omYVGqa19UHp0Hr8eJ', name: 'OuraiWorld/Poster01.png' },
+      #       { id: '1ZEnw6zHG9_hoVtEXu-6V_RwTU3gL8zX-', name: 'OuraiWorld/Poster02.png' },
+      #       { id: '1gEgzkHV3rwkq9piExV3sN01wCJD-dwi-', name: 'OuraiWorld/Poster03.png' },
+      #       { id: '1gSqdvTKzpZLx47SWwOzNF76XCDrjzdO8', name: 'OuraiWorld/Poster04.png' },
+      #     ];
 
-        (async () => {
-          for (const { id, name } of fileIds) {
-            await downloadFile(id, name);
-          }
-        })();
-        EOF
+      #     async function downloadFile(fileId, fileName) {
+      #       const dest = fs.createWriteStream(fileName);
+      #       const response = await drive.files.get({ fileId, alt: 'media' }, { responseType: 'stream' });
+      #       return new Promise((resolve, reject) => {
+      #         response.data
+      #           .on('end', () => {
+      #             console.log(`Downloaded ${fileName}`);
+      #             resolve();
+      #           })
+      #           .on('error', err => {
+      #             console.error(`Error downloading file ${fileName}:`, err);
+      #             reject(err);
+      #           })
+      #           .pipe(dest);
+      #       });
+      #     }
 
-    - name: Check for changes
-      run: |
-        git config --global user.email "action@github.com"
-        git config --global user.name "GitHub Action"
+      #     (async () => {
+      #       for (const { id, name } of fileIds) {
+      #         await downloadFile(id, name);
+      #       }
+      #     })();
+      #     EOF
 
-        git add --all
-        git reset -- package.json package-lock.json node_modules/
+      - name: Check for changes
+        run: |
+          git config --global user.email "action@github.com"
+          git config --global user.name "GitHub Action"
 
-        if ! git diff-index --quiet HEAD --; then
-          git commit -m "Update images from Google Drive"
-          git push
-        else
-          echo "No changes to commit."
-        fi
+          git add --all
+          git reset -- package.json package-lock.json node_modules/
+
+          if ! git diff-index --quiet HEAD --; then
+            git commit -m "Update images from Google Drive"
+            git push
+          else
+            echo "No changes to commit."
+          fi
