@@ -81,11 +81,14 @@ jobs:
         })();
         EOF
 
-    # 変更をリポジトリにコミット
-    - name: Commit and push changes
+    - name: Check for changes
       run: |
-        git config --local user.email "action@github.com"
-        git config --local user.name "GitHub Action"
+        git config --global user.email "action@github.com"
+        git config --global user.name "GitHub Action"
         git add .
-        git commit -m "Update images from Google Drive"
-        git push origin main
+        if ! git diff-index --quiet HEAD --; then
+          git commit -m "Update images from Google Drive"
+          git push
+        else
+          echo "No changes to commit."
+        fi
