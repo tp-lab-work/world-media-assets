@@ -19,5 +19,5 @@ runs:
         QUERY: ${{ inputs.query }}
         DESTINATION: ${{ inputs.destination }}
       run: |
-        node .github/actions/scripts/downloadFiles.js
+        node .github/actions/scripts/download-files.js
       shell: bash

@@ -40,7 +40,7 @@ jobs:
         with:
           service_account_json_path: "./service-account.json"
           spreadsheet_file_id: "${{ secrets.OURAI_WORLD_SPREADSHEET_ID }}"
-          destination: "./OuraiWorld/worlds.csv"
+          destination_path: "./OuraiWorld/worlds.csv"
 
       - name: Check for changes
         run: |
