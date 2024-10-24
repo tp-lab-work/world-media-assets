@@ -1,0 +1,21 @@
+name: "Setup Node.js and Install Packages"
+description: "Setup Node.js and install dependencies"
+inputs:
+  node_version:
+    description: "Node.js version to install"
+    required: true
+  package_file:
+    description: "Path to the package.json file"
+    required: true
+runs:
+  using: "composite"
+  steps:
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: ${{ inputs.node_version }}
+
+    - name: Install packages
+      run: |
+        npm install --prefix ${{ inputs.package_file }}
+      shell: bash

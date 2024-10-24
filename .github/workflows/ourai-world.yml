@@ -18,13 +18,15 @@ jobs:
         run: |
           echo '${{ secrets.SERVICE_ACCOUNT_JSON }}' > service-account.json
 
+      - name: Setup Node.js and Install Packages
+        uses: ./.github/actions/setup-node-and-install
+        with:
+          node_version: "16"
+          package_file: "./.github/actions/setup-node-and-install/package.json"
+
       - name: Download file from Google Drive
         uses: ./.github/actions/google-drive-downloader
         with:
-          google_client_id: ${{ secrets.GOOGLE_CLIENT_ID }}
-          google_client_secret: ${{ secrets.GOOGLE_CLIENT_SECRET }}
-          google_refresh_token: ${{ secrets.GOOGLE_REFRESH_TOKEN }}
-          file_ids: ${{ vars.IMAGE_FILE_IDS }}
           service_account_json_path: "./service-account.json"
           query: "'1y9KPjtCoz_AIZW76QJaHjV05wybLmU-m' in parents"
           destination: "./OuraiWorld"

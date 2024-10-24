@@ -23,20 +23,16 @@ async function downloadFileByQuery() {
   }
 
   // 保存先のパスをリポジトリのルートからの相対パスで生成
-  console.log("GITHUB_WORKSPACE", process.env.GITHUB_WORKSPACE);
   const destDir = path.join(
     process.env.GITHUB_WORKSPACE,
     process.env.DESTINATION
   );
-  console.log("path", process.env.DESTINATION);
-  console.log("destDir", destDir);
 
   for (const file of res.data.files) {
     console.log(`Found file: ${file.name} (${file.id})`);
 
     // ファイルをダウンロード
     const destPath = `${destDir}/${file.name}`;
-    console.log("destPath", destPath);
     const dest = fs.createWriteStream(destPath);
     const response = await drive.files.get(
       {
