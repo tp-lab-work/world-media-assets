@@ -4,6 +4,7 @@ node_modules/
 # Package files
 package.json
 package-lock.json
+!.github/actions/setup-node-and-install/package.json
 
 # service action files
 service-account.json

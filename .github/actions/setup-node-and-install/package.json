@@ -1,0 +1,8 @@
+{
+  "name": "setup-node-and-install",
+  "version": "1.0.0",
+  "description": "Setup Node.js and install dependencies",
+  "dependencies": {
+    "googleapis": "^105.0.0"
+  }
+}
