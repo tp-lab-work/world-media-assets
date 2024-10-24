@@ -24,8 +24,8 @@ runs:
 
     # 必要なパッケージをインストール
     - name: Install dependencies
-      run: |
-        npm install googleapis
+      run: npm install googleapis
+      shell: bash
 
     # q: "'1y9KPjtCoz_AIZW76QJaHjV05wybLmU-m' in parents"
     # path: "./OuraiWorld/"
@@ -78,3 +78,4 @@ runs:
           }
         })();
         EOF
+      shell: bash
