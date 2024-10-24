@@ -1,4 +1,5 @@
 const fs = require("fs");
+const path = require("path");
 const { google } = require("googleapis");
 
 // 認証設定
@@ -22,7 +23,7 @@ async function downloadFileByQuery() {
   }
 
   // 保存先のパスをリポジトリのルートからの相対パスで生成
-  const destDir = path.join(process.cwd(), process.env.PATH); // カレントワーキングディレクトリから相対パスを作成
+  const destDir = path.join(process.cwd(), process.env.PATH);
   const destBasePath = path.join(destDir, file.name);
 
   for (const file of res.data.files) {
