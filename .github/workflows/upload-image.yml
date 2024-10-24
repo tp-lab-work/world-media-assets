@@ -1,8 +1,9 @@
 name: Update Images from Google Drive
 
 on:
-  repository_dispatch:
-    types: [on-demand-upload-images]
+  push:
+    branches:
+      - main
 
 jobs:
   update-images:
