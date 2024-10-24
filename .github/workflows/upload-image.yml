@@ -14,7 +14,7 @@ jobs:
         with:
           token: ${{ secrets.PAT_TOKEN }}
 
-      - uses: raeperd/google-drive-download-action@v1.0
+      - uses: raeperd/google-drive-download-action@v1
         with:
           clientId: ${{ secrets.GOOGLE_CLIENT_ID }}
           clientSecret: ${{ secrets.GOOGLE_CLIENT_SECRET }}
