@@ -5,6 +5,9 @@ const fs = require("fs");
 const serviceAccountJsonPath = process.env.SERVICE_ACCOUNT_JSON_PATH;
 const spreadsheetFileId = process.env.SPREADSHEET_FILE_ID;
 const destinationPath = process.env.DESTINATION_PATH;
+console.log("serviceAccountJsonPath", serviceAccountJsonPath);
+console.log("spreadsheetFileId", spreadsheetFileId);
+console.log("destinationPath", destinationPath);
 
 const auth = new google.auth.GoogleAuth({
   keyFile: serviceAccountJsonPath,
@@ -17,8 +20,15 @@ const dest = fs.createWriteStream(destinationPath);
 drive.files.export(
   { spreadsheetFileId, mimeType: "text/csv" },
   { responseType: "stream" },
-  (err, { data }) => {
-    if (err) throw err;
+  (err, res) => {
+    if (err) {
+      console.error("Error exporting file:", err);
+      throw err;
+    }
+    if (!res || !res.data) {
+      console.error("Response is undefined or missing data.");
+      throw new Error("Response is undefined or missing data.");
+    }
     data.pipe(dest);
   }
 );
