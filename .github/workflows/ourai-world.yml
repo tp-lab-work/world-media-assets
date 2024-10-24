@@ -1,0 +1,57 @@
+name: Update Files from Google Drive
+
+on:
+  repository_dispatch:
+    types: [on-demand-ourai-world-update]
+
+jobs:
+  update-files:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.PAT_TOKEN }}
+
+      - name: Create service account JSON file
+        run: |
+          echo '${{ secrets.SERVICE_ACCOUNT_JSON }}' > service-account.json
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node_version: "16"
+
+      - name: Install packages
+        run: |
+          npm install
+        shell: bash
+
+      - name: Download file from Google Drive
+        uses: ./.github/actions/google-drive-downloader
+        with:
+          service_account_json_path: "./service-account.json"
+          query: "'${{ secrets.OURAI_POSTER_FOLDER_ID }}' in parents"
+          destination: "./OuraiWorld"
+
+      - name: Download spreadsheet as CSV
+        uses: ./.github/actions/google-spreadsheet-to-csv
+        with:
+          service_account_json_path: "./service-account.json"
+          spreadsheet_file_id: "${{ secrets.OURAI_WORLD_SPREADSHEET_ID }}"
+          destination_path: "./OuraiWorld/worlds.csv"
+
+      - name: Check for changes
+        run: |
+          git config --global user.email "action@github.com"
+          git config --global user.name "GitHub Action"
+
+          git add --all
+          git reset -- package.json package-lock.json node_modules/
+
+          if ! git diff-index --quiet HEAD --; then
+            git commit -m "Update images from Google Drive"
+            git push
+          else
+            echo "No changes to commit."
+          fi

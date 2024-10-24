@@ -1,0 +1,23 @@
+name: "Google Spreadsheet to CSV Downloader"
+description: "Downloads a Google Spreadsheet and exports it as a CSV file."
+inputs:
+  service_account_json_path:
+    description: "GCE Service Account Json Path"
+    required: true
+  spreadsheet_file_id:
+    description: Google Spreadsheet file ID to download.
+    required: true
+  destination_path:
+    description: Destination file path to save the CSV file.
+    required: true
+runs:
+  using: composite
+  steps:
+    - name: Download spreadsheet and convert to CSV
+      env:
+        SERVICE_ACCOUNT_JSON_PATH: ${{ inputs.service_account_json_path }}
+        SPREADSHEET_FILE_ID: ${{ inputs.spreadsheet_file_id }}
+        DESTINATION_PATH: ${{ inputs.destination_path }}
+      run: |
+        node .github/actions/scripts/google-spreadsheet-to-csv.js
+      shell: bash

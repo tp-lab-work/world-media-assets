@@ -1,0 +1,23 @@
+name: "Google Drive File Downloader"
+description: "Download files from Google Drive"
+inputs:
+  service_account_json_path:
+    description: "GCE Service Account Json Path"
+    required: true
+  query:
+    description: "Download Targets Search Query"
+    required: true
+  destination:
+    description: "Path to download files default to working directory"
+    required: true
+runs:
+  using: composite
+  steps:
+    - name: Download images from Google Drive
+      env:
+        SERVICE_ACCOUNT_JSON_PATH: ${{ inputs.service_account_json_path }}
+        QUERY: ${{ inputs.query }}
+        DESTINATION: ${{ inputs.destination }}
+      run: |
+        node .github/actions/scripts/download-files.js
+      shell: bash
