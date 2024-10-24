@@ -27,7 +27,7 @@ jobs:
           file_ids: ${{ vars.IMAGE_FILE_IDS }}
           service_account_json_path: "./service-account.json"
           query: "'1y9KPjtCoz_AIZW76QJaHjV05wybLmU-m' in parents"
-          path: "./OuraiWorld/"
+          path: "./OuraiWorld"
 
       - name: Check for changes
         run: |
