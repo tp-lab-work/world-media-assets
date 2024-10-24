@@ -1,9 +1,8 @@
 name: Update Files from Google Drive
 
 on:
-  push:
-    branches:
-      - main
+  repository_dispatch:
+    types: [on-demand-ourai-world-update]
 
 jobs:
   update-files:
