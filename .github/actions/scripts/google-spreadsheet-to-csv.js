@@ -18,7 +18,7 @@ const drive = google.drive({ version: "v3", auth });
 
 const dest = fs.createWriteStream(destinationPath);
 drive.files.export(
-  { spreadsheetFileId, mimeType: "text/csv" },
+  { fileId: spreadsheetFileId, mimeType: "text/csv" },
   { responseType: "stream" },
   (err, res) => {
     if (err) {
