@@ -14,14 +14,13 @@ jobs:
         with:
           token: ${{ secrets.PAT_TOKEN }}
 
-      - uses: raeperd/google-drive-download-action@v1
+      - name: Download file from Google Drive
+        uses: ./.github/actions/google-drive-downloader
         with:
-          clientId: ${{ secrets.GOOGLE_CLIENT_ID }}
-          clientSecret: ${{ secrets.GOOGLE_CLIENT_SECRET }}
-          redirectUri: ${{ secrets.GOOGLE_REDIRECT_URI }}
-          credential_json: ${{ secrets.GOOGLE_CREDENTIAL_JSON }}
-          q: "'1y9KPjtCoz_AIZW76QJaHjV05wybLmU-m' in parents"
-          path: "./OuraiWorld/"
+          google_client_id: ${{ secrets.GOOGLE_CLIENT_ID }}
+          google_client_secret: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+          google_refresh_token: ${{ secrets.GOOGLE_REFRESH_TOKEN }}
+          file_ids: ${{ vars.IMAGE_FILE_IDS }}
 
       # # Node.jsをセットアップ
       # - name: Setup Node.js
@@ -34,6 +33,8 @@ jobs:
       #   run: |
       #     npm install googleapis
 
+      # # q: "'1y9KPjtCoz_AIZW76QJaHjV05wybLmU-m' in parents"
+      # # path: "./OuraiWorld/"
       # # Google Driveから画像をダウンロード
       # - name: Download images from Google Drive
       #   env:
