@@ -14,66 +14,75 @@ jobs:
         with:
           token: ${{ secrets.PAT_TOKEN }}
 
-      # Node.jsをセットアップ
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
+      - uses: raeperd/raeperd/google-drive-download-action@v1.0
         with:
-          node-version: "20"
+          clientId: ${{ secrets.GOOGLE_CLIENT_ID }}
+          clientSecret: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+          redirectUri: ${{ secrets.GOOGLE_REDIRECT_URI }}
+          credential_json: ${{ secrets.GOOGLE_CREDENTIAL_JSON }}
+          q: "'1y9KPjtCoz_AIZW76QJaHjV05wybLmU-m' in parents"
+          path: "./OuraiWorld/"
 
-      # 必要なパッケージをインストール
-      - name: Install dependencies
-        run: |
-          npm install googleapis
+      # # Node.jsをセットアップ
+      # - name: Setup Node.js
+      #   uses: actions/setup-node@v3
+      #   with:
+      #     node-version: "20"
 
-      # Google Driveから画像をダウンロード
-      - name: Download images from Google Drive
-        env:
-          GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
-          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
-          GOOGLE_REFRESH_TOKEN: ${{ secrets.GOOGLE_REFRESH_TOKEN }}
-          IMAGE_FILE_IDS: ${{ vars.IMAGE_FILE_IDS }}
-        run: |
-          node << 'EOF'
-          const {google} = require('googleapis');
-          const fs = require('fs');
-          const path = require('path');
+      # # 必要なパッケージをインストール
+      # - name: Install dependencies
+      #   run: |
+      #     npm install googleapis
 
-          const oauth2Client = new google.auth.OAuth2(
-            process.env.GOOGLE_CLIENT_ID,
-            process.env.GOOGLE_CLIENT_SECRET,
-          );
-          oauth2Client.setCredentials({
-            refresh_token: process.env.GOOGLE_REFRESH_TOKEN
-          });
+      # # Google Driveから画像をダウンロード
+      # - name: Download images from Google Drive
+      #   env:
+      #     GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+      #     GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+      #     GOOGLE_REFRESH_TOKEN: ${{ secrets.GOOGLE_REFRESH_TOKEN }}
+      #     IMAGE_FILE_IDS: ${{ vars.IMAGE_FILE_IDS }}
+      #   run: |
+      #     node << 'EOF'
+      #     const {google} = require('googleapis');
+      #     const fs = require('fs');
+      #     const path = require('path');
 
-          const drive = google.drive({ version: 'v3', auth: oauth2Client });
+      #     const oauth2Client = new google.auth.OAuth2(
+      #       process.env.GOOGLE_CLIENT_ID,
+      #       process.env.GOOGLE_CLIENT_SECRET,
+      #     );
+      #     oauth2Client.setCredentials({
+      #       refresh_token: process.env.GOOGLE_REFRESH_TOKEN
+      #     });
 
-          // 複数のファイルIDを指定
-          const fileIds = JSON.parse(process.env.IMAGE_FILE_IDS);
+      #     const drive = google.drive({ version: 'v3', auth: oauth2Client });
 
-          async function downloadFile(fileId, fileName) {
-            const dest = fs.createWriteStream(fileName);
-            const response = await drive.files.get({ fileId, alt: 'media' }, { responseType: 'stream' });
-            return new Promise((resolve, reject) => {
-              response.data
-                .on('end', () => {
-                  console.log(`Downloaded ${fileName}`);
-                  resolve();
-                })
-                .on('error', err => {
-                  console.error(`Error downloading file ${fileName}:`, err);
-                  reject(err);
-                })
-                .pipe(dest);
-            });
-          }
+      #     // 複数のファイルIDを指定
+      #     const fileIds = JSON.parse(process.env.IMAGE_FILE_IDS);
 
-          (async () => {
-            for (const { id, name } of fileIds) {
-              await downloadFile(id, name);
-            }
-          })();
-          EOF
+      #     async function downloadFile(fileId, fileName) {
+      #       const dest = fs.createWriteStream(fileName);
+      #       const response = await drive.files.get({ fileId, alt: 'media' }, { responseType: 'stream' });
+      #       return new Promise((resolve, reject) => {
+      #         response.data
+      #           .on('end', () => {
+      #             console.log(`Downloaded ${fileName}`);
+      #             resolve();
+      #           })
+      #           .on('error', err => {
+      #             console.error(`Error downloading file ${fileName}:`, err);
+      #             reject(err);
+      #           })
+      #           .pipe(dest);
+      #       });
+      #     }
+
+      #     (async () => {
+      #       for (const { id, name } of fileIds) {
+      #         await downloadFile(id, name);
+      #       }
+      #     })();
+      #     EOF
 
       - name: Check for changes
         run: |
