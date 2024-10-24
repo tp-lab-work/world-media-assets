@@ -16,7 +16,7 @@ jobs:
 
       - name: Create service account JSON file
         run: |
-          echo "${{ secrets.SERVICE_ACCOUNT_JSON }}" > service-account.json
+          echo "${{ secrets.SERVICE_ACCOUNT_JSON }}" | jq . > service-account.json
 
       - name: Download file from Google Drive
         uses: ./.github/actions/google-drive-downloader
