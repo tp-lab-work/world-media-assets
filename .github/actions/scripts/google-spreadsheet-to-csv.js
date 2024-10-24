@@ -29,6 +29,6 @@ drive.files.export(
       console.error("Response is undefined or missing data.");
       throw new Error("Response is undefined or missing data.");
     }
-    data.pipe(dest);
+    res.data.pipe(dest);
   }
 );
