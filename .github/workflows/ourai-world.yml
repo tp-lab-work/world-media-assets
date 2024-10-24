@@ -18,10 +18,15 @@ jobs:
         run: |
           echo '${{ secrets.SERVICE_ACCOUNT_JSON }}' > service-account.json
 
-      - name: Setup Node.js and Install Packages
-        uses: ./.github/actions/setup-node-and-install
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
         with:
           node_version: "16"
+
+      - name: Install packages
+        run: |
+          npm install
+        shell: bash
 
       - name: Download file from Google Drive
         uses: ./.github/actions/google-drive-downloader
