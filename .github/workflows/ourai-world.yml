@@ -1,0 +1,44 @@
+name: Update Images from Google Drive
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  update-files:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.PAT_TOKEN }}
+
+      - name: Create service account JSON file
+        run: |
+          echo "${{ secrets.SERVICE_ACCOUNT_JSON }}" > service-account.json
+
+      - name: Download file from Google Drive
+        uses: ./.github/actions/google-drive-downloader
+        with:
+          google_client_id: ${{ secrets.GOOGLE_CLIENT_ID }}
+          google_client_secret: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+          google_refresh_token: ${{ secrets.GOOGLE_REFRESH_TOKEN }}
+          file_ids: ${{ vars.IMAGE_FILE_IDS }}
+          service_account_json_path: "./service-account.json"
+          query: "'1y9KPjtCoz_AIZW76QJaHjV05wybLmU-m' in parents"
+
+      - name: Check for changes
+        run: |
+          git config --global user.email "action@github.com"
+          git config --global user.name "GitHub Action"
+
+          git add --all
+          git reset -- package.json package-lock.json node_modules/
+
+          if ! git diff-index --quiet HEAD --; then
+            git commit -m "Update images from Google Drive"
+            git push
+          else
+            echo "No changes to commit."
+          fi
