@@ -1,43 +1,50 @@
-const fs = require('fs');
-const { google } = require('googleapis');
+const fs = require("fs");
+const { google } = require("googleapis");
 
 // 認証設定
 const auth = new google.auth.GoogleAuth({
   keyFile: process.env.SERVICE_ACCOUNT_JSON_PATH,
-  scopes: ['https://www.googleapis.com/auth/drive.readonly'],
+  scopes: ["https://www.googleapis.com/auth/drive.readonly"],
 });
 
-const drive = google.drive({ version: 'v3', auth });
+const drive = google.drive({ version: "v3", auth });
 
 async function downloadFileByQuery() {
   // クエリを使用してファイルを検索
   const res = await drive.files.list({
     q: process.env.QUERY,
-    fields: 'files(id, name)'
+    fields: "files(id, name)",
   });
 
   if (res.data.files.length === 0) {
-    console.log('No files found.');
+    console.log("No files found.");
     return;
   }
+
+  // 保存先のパスをリポジトリのルートからの相対パスで生成
+  const destDir = path.join(process.cwd(), process.env.PATH); // カレントワーキングディレクトリから相対パスを作成
+  const destBasePath = path.join(destDir, file.name);
 
   for (const file of res.data.files) {
     console.log(`Found file: ${file.name} (${file.id})`);
 
     // ファイルをダウンロード
-    const destPath = `${process.env.PATH}/${file.name}`;
+    const destPath = `${destBasePath}/${file.name}`;
     const dest = fs.createWriteStream(destPath);
-    const response = await drive.files.get({
-      fileId: file.id,
-      alt: 'media',
-    }, { responseType: 'stream' });
+    const response = await drive.files.get(
+      {
+        fileId: file.id,
+        alt: "media",
+      },
+      { responseType: "stream" }
+    );
 
     response.data
-      .on('end', () => {
+      .on("end", () => {
         console.log(`Downloaded file to ${destPath}`);
       })
-      .on('error', (err) => {
-        console.error('Error downloading file:', err);
+      .on("error", (err) => {
+        console.error("Error downloading file:", err);
       })
       .pipe(dest);
   }
