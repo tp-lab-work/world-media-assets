@@ -1,4 +1,4 @@
-name: Update Images from Google Drive
+name: Update Files from Google Drive
 
 on:
   push:
@@ -32,14 +32,14 @@ jobs:
         uses: ./.github/actions/google-drive-downloader
         with:
           service_account_json_path: "./service-account.json"
-          query: "'1y9KPjtCoz_AIZW76QJaHjV05wybLmU-m' in parents"
+          query: "'${{ secrets.OURAI_POSTER_FOLDER_ID }}' in parents"
           destination: "./OuraiWorld"
 
       - name: Download spreadsheet as CSV
         uses: ./.github/actions/google-spreadsheet-to-csv
         with:
           service_account_json_path: "./service-account.json"
-          spreadsheet_file_id: "1lf1XraDnHRX0PAklcFMLZSgKqE5haSOnpa__B89ltLw"
+          spreadsheet_file_id: "${{ secrets.OURAI_WORLD_SPREADSHEET_ID }}"
           destination: "./OuraiWorld/worlds.csv"
 
       - name: Check for changes
