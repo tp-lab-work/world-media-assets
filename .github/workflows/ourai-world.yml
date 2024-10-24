@@ -22,7 +22,6 @@ jobs:
         uses: ./.github/actions/setup-node-and-install
         with:
           node_version: "16"
-          package_file: "."
 
       - name: Download file from Google Drive
         uses: ./.github/actions/google-drive-downloader
@@ -30,6 +29,13 @@ jobs:
           service_account_json_path: "./service-account.json"
           query: "'1y9KPjtCoz_AIZW76QJaHjV05wybLmU-m' in parents"
           destination: "./OuraiWorld"
+
+      - name: Download spreadsheet as CSV
+        uses: ./.github/actions/google-spreadsheet-to-csv
+        with:
+          service_account_json_path: "./service-account.json"
+          spreadsheet_file_id: "1lf1XraDnHRX0PAklcFMLZSgKqE5haSOnpa__B89ltLw"
+          destination: "./OuraiWorld/worlds.csv"
 
       - name: Check for changes
         run: |
