@@ -14,79 +14,65 @@ jobs:
         with:
           token: ${{ secrets.PAT_TOKEN }}
 
-      # カスタムアクションを利用してGoogle Driveから画像をダウンロード
-      - name: Download images from Google Drive
-        uses: tp-jp/gdrive-file-downloader@main
+      # Node.jsをセットアップ
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
         with:
-          google_client_id: ${{ secrets.GOOGLE_CLIENT_ID }}
-          google_client_secret: ${{ secrets.GOOGLE_CLIENT_SECRET }}
-          google_refresh_token: ${{ secrets.GOOGLE_REFRESH_TOKEN }}
-          file_ids: "[{ id: '1qOEViIFBiyeC1OR3k4IRRJOl8BysFor6', name: 'OuraiWorld/Poster01.png' },{ id: '10NkMlw6CyG-kOMk7wcQERxJ4aD2Tn9rG', name: 'OuraiWorld/Poster02.png' },{ id: '1w4wxGPvUUL_Ix4PYU-ps1Z0afgsSYuuD', name: 'OuraiWorld/Poster03.png' },{ id: '1w1PeMqmc0eLMwPRZaiEFZMCKS_VSVoZB', name: 'OuraiWorld/Poster04.png' }]"
+          node-version: "20"
 
-      # # Node.jsをセットアップ
-      # - name: Setup Node.js
-      #   uses: actions/setup-node@v3
-      #   with:
-      #     node-version: "20"
+      # 必要なパッケージをインストール
+      - name: Install dependencies
+        run: |
+          npm install googleapis
 
-      # # 必要なパッケージをインストール
-      # - name: Install dependencies
-      #   run: |
-      #     npm install googleapis
+      # Google Driveから画像をダウンロード
+      - name: Download images from Google Drive
+        env:
+          GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+          GOOGLE_REFRESH_TOKEN: ${{ secrets.GOOGLE_REFRESH_TOKEN }}
+        run: |
+          node << 'EOF'
+          const {google} = require('googleapis');
+          const fs = require('fs');
+          const path = require('path');
 
-      # # Google Driveから画像をダウンロード
-      # - name: Download images from Google Drive
-      #   env:
-      #     GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
-      #     GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
-      #     GOOGLE_REFRESH_TOKEN: ${{ secrets.GOOGLE_REFRESH_TOKEN }}
-      #   run: |
-      #     node << 'EOF'
-      #     const {google} = require('googleapis');
-      #     const fs = require('fs');
-      #     const path = require('path');
+          const oauth2Client = new google.auth.OAuth2(
+            process.env.GOOGLE_CLIENT_ID,
+            process.env.GOOGLE_CLIENT_SECRET,
+          );
+          oauth2Client.setCredentials({
+            refresh_token: process.env.GOOGLE_REFRESH_TOKEN
+          });
 
-      #     const oauth2Client = new google.auth.OAuth2(
-      #       process.env.GOOGLE_CLIENT_ID,
-      #       process.env.GOOGLE_CLIENT_SECRET,
-      #     );
-      #     oauth2Client.setCredentials({
-      #       refresh_token: process.env.GOOGLE_REFRESH_TOKEN
-      #     });
+          const drive = google.drive({ version: 'v3', auth: oauth2Client });
 
-      #     const drive = google.drive({ version: 'v3', auth: oauth2Client });
+          // 複数のファイルIDを指定
+          const fileIds = JSON.parse(process.env.IMAGE_FILE_IDS);
 
-      #     // 複数のファイルIDを指定
-      #     const fileIds = [
-      #       { id: '1qOEViIFBiyeC1OR3k4IRRJOl8BysFor6', name: 'OuraiWorld/Poster01.png' },
-      #       { id: '10NkMlw6CyG-kOMk7wcQERxJ4aD2Tn9rG', name: 'OuraiWorld/Poster02.png' },
-      #       { id: '1w4wxGPvUUL_Ix4PYU-ps1Z0afgsSYuuD', name: 'OuraiWorld/Poster03.png' },
-      #       { id: '1w1PeMqmc0eLMwPRZaiEFZMCKS_VSVoZB', name: 'OuraiWorld/Poster04.png' },
-      #     ];
+          async function downloadFile(fileId, fileName) {
+            const dest = fs.createWriteStream(fileName);
+            const response = await drive.files.get({ fileId, alt: 'media' }, { responseType: 'stream' });
+            return new Promise((resolve, reject) => {
+              response.data
+                .on('end', () => {
+                  console.log(`Downloaded ${fileName}`);
+                  resolve();
+                })
+                .on('error', err => {
+                  console.error(`Error downloading file ${fileName}:`, err);
+                  reject(err);
+                })
+                .pipe(dest);
+            });
+          }
 
-      #     async function downloadFile(fileId, fileName) {
-      #       const dest = fs.createWriteStream(fileName);
-      #       const response = await drive.files.get({ fileId, alt: 'media' }, { responseType: 'stream' });
-      #       return new Promise((resolve, reject) => {
-      #         response.data
-      #           .on('end', () => {
-      #             console.log(`Downloaded ${fileName}`);
-      #             resolve();
-      #           })
-      #           .on('error', err => {
-      #             console.error(`Error downloading file ${fileName}:`, err);
-      #             reject(err);
-      #           })
-      #           .pipe(dest);
-      #       });
-      #     }
-
-      #     (async () => {
-      #       for (const { id, name } of fileIds) {
-      #         await downloadFile(id, name);
-      #       }
-      #     })();
-      #     EOF
+          (async () => {
+            for (const { id, name } of fileIds) {
+              await downloadFile(id, name);
+            }
+          })();
+          EOF
 
       - name: Check for changes
         run: |
