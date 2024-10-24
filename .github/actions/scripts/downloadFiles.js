@@ -24,13 +24,12 @@ async function downloadFileByQuery() {
 
   // 保存先のパスをリポジトリのルートからの相対パスで生成
   const destDir = path.join(process.cwd(), process.env.PATH);
-  const destBasePath = path.join(destDir, file.name);
 
   for (const file of res.data.files) {
     console.log(`Found file: ${file.name} (${file.id})`);
 
     // ファイルをダウンロード
-    const destPath = `${destBasePath}/${file.name}`;
+    const destPath = `${destDir}/${file.name}`;
     const dest = fs.createWriteStream(destPath);
     const response = await drive.files.get(
       {
